@@ -153,7 +153,7 @@ async def client(settings: Settings, fake_sii: FakeSii) -> AsyncIterator[httpx.A
     app.dependency_overrides[settings_dep] = lambda: settings
 
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
+    async with httpx.AsyncClient(transport=transport, base_url="https://test") as http:
         yield http
     await engine.dispose()
 

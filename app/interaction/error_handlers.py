@@ -38,10 +38,15 @@ def _error(status: int, code: str, message: str, details: dict | None = None) ->
     )
 
 
+def error_response(exc: AppError) -> JSONResponse:
+    """The standard error body for a domain exception (for routes that must add headers)."""
+    return _error(STATUS_BY_CODE.get(exc.code, 400), exc.code, exc.message, exc.details)
+
+
 def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(_: Request, exc: AppError) -> JSONResponse:
-        return _error(STATUS_BY_CODE.get(exc.code, 400), exc.code, exc.message, exc.details)
+        return error_response(exc)
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:

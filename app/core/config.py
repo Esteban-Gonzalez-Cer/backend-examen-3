@@ -17,6 +17,13 @@ class Settings(BaseSettings):
     # project boots before the Supabase project is configured.
     database_url: str = "sqlite+aiosqlite:///./trayecta-local.db"
     session_ttl_minutes: int = 30
+    # Secret used to encrypt the SII token at rest (sessions table). Any long random string.
+    # If empty, a random one is generated per process: sessions then can't be restored after
+    # a restart (users simply log in again).
+    session_secret: str = ""
+    # Whether the refresh cookie is `Secure` (HTTPS only). Empty = automatic: Secure for every
+    # host except localhost/127.0.0.1, because Safari drops Secure cookies on http://localhost.
+    cookie_secure: bool | None = None
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
     admin_control_numbers: Annotated[list[str], NoDecode] = []
 
@@ -26,6 +33,11 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
+
+    @field_validator("cookie_secure", mode="before")
+    @classmethod
+    def _empty_is_auto(cls, value: object) -> object:
+        return None if isinstance(value, str) and not value.strip() else value
 
     @property
     def async_database_url(self) -> str:

@@ -84,6 +84,97 @@ async def test_relogin_issues_a_new_working_token(client, fake_sii):
     assert (await client.get("/api/v1/students/me", headers=auth(new))).status_code == 200
 
 
+# --------------------------------------------------------------------------- refresh cookie
+
+REFRESH = "trayecta_refresh"
+
+
+async def test_login_sets_httponly_refresh_cookie(client):
+    await login(client)
+    header = (await client.post(
+        "/api/v1/auth/login", json={"email": "l23031035@celaya.tecnm.mx", "password": TEST_PASSWORD}
+    )).headers["set-cookie"]
+    assert header.startswith(f"{REFRESH}=")
+    lowered = header.lower()
+    for flag in ("httponly", "secure", "samesite=strict", "path=/api/v1/auth", "max-age="):
+        assert flag in lowered
+    # The SII token never travels in the cookie.
+    assert client.cookies.get(REFRESH) and "." not in client.cookies.get(REFRESH)
+
+
+async def test_cookie_is_not_secure_on_localhost(client):
+    response = await client.post(
+        "http://localhost/api/v1/auth/login",
+        json={"email": "l23031035@celaya.tecnm.mx", "password": TEST_PASSWORD},
+    )
+    assert response.status_code == 200
+    assert "secure" not in response.headers["set-cookie"].lower()  # Safari would drop it on http
+
+
+async def test_refresh_restores_the_same_session(client):
+    login_body = (await client.post(
+        "/api/v1/auth/login", json={"email": "l23031035@celaya.tecnm.mx", "password": TEST_PASSWORD}
+    )).json()
+    response = await client.post("/api/v1/auth/refresh")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["accessToken"] == login_body["accessToken"]
+    assert body["expiresAt"] == login_body["expiresAt"]  # refresh never extends the session
+    assert body["student"]["numeroControl"] == "23031035"
+    assert body["student"]["isAdmin"] is True
+    assert (await client.get("/api/v1/students/me", headers=auth(body["accessToken"]))).status_code == 200
+
+
+async def test_refresh_without_cookie_is_rejected(client):
+    response = await client.post("/api/v1/auth/refresh")
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "INVALID_TOKEN"
+
+
+async def test_refresh_after_expiry_fails_and_drops_cookie(client, settings):
+    settings.session_ttl_minutes = 0
+    login_response = await client.post(
+        "/api/v1/auth/login", json={"email": "l23031035@celaya.tecnm.mx", "password": TEST_PASSWORD}
+    )
+    # A browser would already drop it (Max-Age=0); replay it anyway to test the server check.
+    cookie = login_response.headers["set-cookie"].split(";")[0].split("=", 1)[1]
+    response = await client.post("/api/v1/auth/refresh", headers={"Cookie": f"{REFRESH}={cookie}"})
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "SESSION_EXPIRED"
+    assert "max-age=0" in response.headers["set-cookie"].lower()
+
+
+async def test_logout_revokes_session_and_clears_cookie(client):
+    token = await login(client)
+    response = await client.post("/api/v1/auth/logout", headers=auth(token))
+    assert response.status_code == 204
+    assert "max-age=0" in response.headers["set-cookie"].lower()
+    # Server-side revocation: neither the bearer token nor the refresh cookie work anymore.
+    assert (await client.get("/api/v1/students/me", headers=auth(token))).status_code == 401
+    assert (await client.post("/api/v1/auth/refresh")).status_code == 401
+
+
+async def test_stolen_refresh_cookie_is_useless_after_logout(client):
+    await login(client)
+    stolen = client.cookies.get(REFRESH)
+    await client.post("/api/v1/auth/logout")
+    client.cookies.clear()
+    client.cookies.set(REFRESH, stolen, domain="test", path="/api/v1/auth")
+    assert (await client.post("/api/v1/auth/refresh")).status_code == 401
+
+
+async def test_logout_is_idempotent(client):
+    assert (await client.post("/api/v1/auth/logout")).status_code == 204
+    assert (await client.post("/api/v1/auth/logout")).status_code == 204
+
+
+async def test_refresh_fails_if_server_secret_changed(client, settings):
+    settings.session_secret = "secret-at-login"
+    await login(client)
+    settings.session_secret = "rotated-secret"
+    assert (await client.post("/api/v1/auth/refresh")).status_code == 401
+
+
 # --------------------------------------------------------------------------- SII-backed views
 
 

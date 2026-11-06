@@ -17,6 +17,7 @@ from app.application.services.auth_service import AuthService
 from app.application.services.whatif_service import ScenarioService, WhatIfService
 from app.core.config import Settings, get_settings
 from app.core.errors import ForbiddenError
+from app.core.security import get_cipher
 from app.data.repositories.curriculum_repo import SqlCurriculumRepository
 from app.data.repositories.scenario_repo import SqlScenarioRepository
 from app.data.repositories.session_repo import SqlSessionRepository, SqlStudentRepository
@@ -71,7 +72,9 @@ def get_auth_service(
     curricula: SqlCurriculumRepository = Depends(get_curriculum_repo),
     settings: Settings = Depends(settings_dep),
 ) -> AuthService:
-    return AuthService(sii, sessions, students, curricula, settings.session_ttl_minutes)
+    return AuthService(
+        sii, sessions, students, curricula, settings.session_ttl_minutes, get_cipher(settings.session_secret)
+    )
 
 
 def get_academic_service(

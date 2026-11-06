@@ -261,6 +261,10 @@ class AuthSession:
     numero_control: str
     issued_at: datetime
     expires_at: datetime
+    # sha256 of the opaque refresh token kept in the HttpOnly cookie.
+    refresh_hash: str | None = None
+    # The SII token encrypted with the server secret, so a refresh can hand it back.
+    token_encrypted: str | None = None
 
 
 @dataclass

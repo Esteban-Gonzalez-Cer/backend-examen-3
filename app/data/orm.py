@@ -15,6 +15,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Text,
     TypeDecorator,
     UniqueConstraint,
     Uuid,
@@ -137,6 +138,8 @@ class SessionORM(Base):
     )
     issued_at: Mapped[datetime] = mapped_column(UTCDateTime())
     expires_at: Mapped[datetime] = mapped_column(UTCDateTime(), index=True)
+    refresh_hash: Mapped[str | None] = mapped_column(String(64), unique=True, index=True, nullable=True)
+    token_encrypted: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class ScenarioORM(Base):

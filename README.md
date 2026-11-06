@@ -79,23 +79,42 @@ Notas:
 
 ## Sesión y token
 
-- **Login:**
-  - `POST /auth/login` valida las credenciales contra el SII y consulta el perfil.
-  - Registra la sesión con `expires_at = min(exp del JWT, ahora + SESSION_TTL_MINUTES)`.
-- **Peticiones protegidas:**
-  - Requieren `Authorization: Bearer <token>`.
-  - Si el token no existe o ya expiró, responden `401` con `SESSION_EXPIRED` o `INVALID_TOKEN`.
+Hay dos tokens:
+
+| Token | Qué es | Dónde vive en el navegador | Para qué |
+|---|---|---|---|
+| **Access token** | El token del SII | Solo en memoria (variable de JavaScript) | Se envía como `Authorization: Bearer` en cada petición |
+| **Refresh token** | Valor aleatorio de 256 bits generado por nosotros | Cookie `HttpOnly` que JavaScript no puede leer | Recuperar el access token al recargar la página |
+
+- **Login** (`POST /auth/login`):
+  - valida las credenciales contra el SII y consulta el perfil;
+  - registra la sesión con `expires_at = min(exp del JWT, ahora + SESSION_TTL_MINUTES)`;
+  - devuelve el access token en el cuerpo y pone la cookie
+    `trayecta_refresh` con `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=<lo que queda de la sesión>`.
+- **Peticiones protegidas:** requieren `Authorization: Bearer <access token>`. Si la sesión no
+  existe o expiró, responden `401` con `INVALID_TOKEN` o `SESSION_EXPIRED`.
+- **Recargar la página** (`POST /auth/refresh`): el navegador envía la cookie sola. El backend busca
+  la sesión por el hash del refresh token y devuelve el mismo access token. **Nunca extiende la
+  sesión**: a los 30 minutos expira igual. Si falla, borra la cookie.
+- **Logout** (`POST /auth/logout`): borra la sesión de la base de datos (queda revocada) y responde
+  con la cookie vencida (`Max-Age=0`), porque JavaScript no puede borrar una cookie `HttpOnly`.
+  Es idempotente.
 - **Si el SII responde 401**, la sesión se borra y se responde `SESSION_EXPIRED`.
-- **No hay endpoint de logout**: el frontend simplemente olvida el token.
+- **En la base de datos** (`sessions`) solo hay:
+  - `sha256` del access token y `sha256` del refresh token;
+  - el token del SII **cifrado** con Fernet (AES + HMAC) usando `SESSION_SECRET`. Hace falta para
+    devolverlo en `/refresh`; sin el secreto, una copia de la base no sirve.
 - **Nunca se guardan ni se registran** contraseñas ni tokens en claro.
 
 ## Endpoints
 
-Todos van bajo `/api/v1`. Todos, excepto el login, requieren el token Bearer.
+Todos van bajo `/api/v1`. Todos, excepto los de `/auth`, requieren el token Bearer.
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| POST | `/auth/login` | Inicia sesión con las credenciales del SII |
+| POST | `/auth/login` | Inicia sesión con las credenciales del SII y pone la cookie de refresh |
+| POST | `/auth/refresh` | Restaura la sesión tras recargar la página (usa la cookie) |
+| POST | `/auth/logout` | Revoca la sesión en el servidor y borra la cookie |
 | GET | `/students/me` | Perfil del estudiante |
 | GET | `/students/me/grades` | Calificaciones del periodo actual |
 | GET | `/students/me/kardex` | Historial académico completo |
@@ -159,6 +178,12 @@ pip install -r requirements-dev.txt
 cp .env.example .env
 ```
 
+Genera un `SESSION_SECRET` y pégalo en `.env`:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
 Edita `.env` y pega en `DATABASE_URL` tu cadena de Supabase:
 - Ruta: Supabase → **Connect** → **Session pooler**.
 - Pégala tal cual, con el prefijo `postgresql://`. El backend la convierte a `asyncpg` por sí solo.
@@ -202,8 +227,8 @@ uvicorn app.main:app --reload --port 8000
 pytest
 ```
 
-- **48 pruebas** en tres grupos:
-  - `unit/`: el motor What-If;
+- **58 pruebas** en tres grupos:
+  - `unit/`: el motor What-If y el cifrado de tokens;
   - `integration/`: el cliente del SII simulado con `respx`;
   - `api/`: la API de punta a punta con SQLite en memoria y un SII falso.
 - No necesitan red ni Supabase.
@@ -219,6 +244,8 @@ pytest
 | `SII_TIMEOUT_SECONDS` | `10` | *Timeout* de cada llamada al SII |
 | `DATABASE_URL` | `postgresql://postgres.<ref>:<pwd>@aws-0-<región>.pooler.supabase.com:5432/postgres` | Conexión a Supabase |
 | `SESSION_TTL_MINUTES` | `30` | Duración de la sesión. Nunca supera el `exp` del token del SII |
+| `SESSION_SECRET` | *(cadena aleatoria larga)* | Cifra el token del SII en la base. Si cambia, todas las sesiones se cierran. Vacío = uno aleatorio por proceso (solo desarrollo) |
+| `COOKIE_SECURE` | *(vacío)* | Vacío = automático: cookie `Secure` (solo HTTPS) en todos lados excepto `localhost`, porque Safari descarta cookies `Secure` en `http://localhost`. `true`/`false` lo fuerzan |
 | `CORS_ORIGINS` | `http://localhost:5173` | Orígenes permitidos, separados por comas |
 | `ADMIN_CONTROL_NUMBERS` | `23031035` | Números de control con acceso a `/admin`, separados por comas |
 
@@ -231,6 +258,8 @@ pytest
 | `Tenant or user not found` | La región del host del pooler no corresponde a tu proyecto. Cópiala tal cual del panel **Connect**. |
 | El navegador muestra un error de CORS | Falta el origen del frontend en `CORS_ORIGINS`. Va sin `/` final. |
 | `503 SII_UNAVAILABLE` | El SII no respondió a tiempo o está caído. |
+| Al recargar la página siempre pide login | La cookie no llega: en producción el frontend debe llamar a `/api/v1` en su propio dominio (proxy de Vercel); en local, deja `COOKIE_SECURE` vacío (si vale `true`, Safari descarta la cookie en `http://localhost`). |
+| Todas las sesiones se cerraron tras un *deploy* | Cambió `SESSION_SECRET` (o no está definido y se generó otro). Defínelo fijo en Render. |
 
 ## Despliegue en Render
 
@@ -243,4 +272,5 @@ El archivo [`render.yaml`](../render.yaml) en la raíz describe el servicio. La 
 - **Variables:**
   - las de la tabla anterior, más `PYTHON_VERSION=3.13.5`;
   - `CORS_ORIGINS` debe ser la URL de Vercel;
-  - `DATABASE_URL` debe ser la del **Session pooler**.
+  - `DATABASE_URL` debe ser la del **Session pooler**;
+  - `SESSION_SECRET` debe ser fijo (el *blueprint* lo genera solo con `generateValue`).

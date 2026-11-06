@@ -18,6 +18,8 @@ class SqlSessionRepository:
         if existing is not None:
             existing.issued_at = session.issued_at
             existing.expires_at = session.expires_at
+            existing.refresh_hash = session.refresh_hash
+            existing.token_encrypted = session.token_encrypted
         else:
             self._db.add(
                 SessionORM(
@@ -25,20 +27,21 @@ class SqlSessionRepository:
                     numero_control=session.numero_control,
                     issued_at=session.issued_at,
                     expires_at=session.expires_at,
+                    refresh_hash=session.refresh_hash,
+                    token_encrypted=session.token_encrypted,
                 )
             )
         await self._db.commit()
 
     async def get(self, token_hash: str) -> AuthSession | None:
         row = await self._db.get(SessionORM, token_hash)
-        if row is None:
-            return None
-        return AuthSession(
-            token_hash=row.token_hash,
-            numero_control=row.numero_control,
-            issued_at=row.issued_at,
-            expires_at=row.expires_at,
-        )
+        return _to_domain(row) if row is not None else None
+
+    async def get_by_refresh(self, refresh_hash: str) -> AuthSession | None:
+        row = (
+            await self._db.execute(select(SessionORM).where(SessionORM.refresh_hash == refresh_hash))
+        ).scalar_one_or_none()
+        return _to_domain(row) if row is not None else None
 
     async def delete(self, token_hash: str) -> None:
         await self._db.execute(delete(SessionORM).where(SessionORM.token_hash == token_hash))
@@ -50,9 +53,32 @@ class SqlSessionRepository:
         return result.rowcount or 0
 
 
+def _to_domain(row: SessionORM) -> AuthSession:
+    return AuthSession(
+        token_hash=row.token_hash,
+        numero_control=row.numero_control,
+        issued_at=row.issued_at,
+        expires_at=row.expires_at,
+        refresh_hash=row.refresh_hash,
+        token_encrypted=row.token_encrypted,
+    )
+
+
 class SqlStudentRepository:
     def __init__(self, db: AsyncSession) -> None:
         self._db = db
+
+    async def get(self, numero_control: str) -> StudentRecord | None:
+        row = await self._db.get(StudentORM, numero_control)
+        if row is None:
+            return None
+        return StudentRecord(
+            numero_control=row.numero_control,
+            full_name=row.full_name,
+            email=row.email,
+            curriculum_id=row.curriculum_id,
+            last_login_at=row.last_login_at,
+        )
 
     async def upsert(self, record: StudentRecord) -> None:
         row = (
