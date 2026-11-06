@@ -1,0 +1,18 @@
+{
+  "code": 200,
+  "message": "Horario del alumno en este periodo",
+  "flag": true,
+  "data": [
+    {
+      "periodo": {"clave_periodo": "26/2", "anio": 2026, "descripcion_periodo": "Agosto - Diciembre 2026"},
+      "horario": [
+        {"id_grupo": 55820, "letra_grupo": "A", "nombre_materia": "CIBERSEGURIDAD", "clave_materia": "IDD-2502", "clave_turno": "C.Celaya", "nombre_plan": "Ingeniería en Sistemas Computacionales", "letra_nivel": "L", "lunes": "12:00-13:00", "lunes_clave_salon": "LRC", "martes": "11:00-13:00", "martes_clave_salon": "LRC", "miercoles": null, "miercoles_clave_salon": null, "jueves": "11:00-13:00", "jueves_clave_salon": "LRC", "viernes": null, "viernes_clave_salon": null, "sabado": null, "sabado_clave_salon": null},
+        {"id_grupo": 56693, "letra_grupo": "B", "nombre_materia": "Gestión de Proyectos de Software", "clave_materia": "SCG-1009", "clave_turno": "C.Celaya", "nombre_plan": "Ingeniería en Sistemas Computacionales", "letra_nivel": "L", "lunes": "15:00-17:00", "lunes_clave_salon": "LIS", "martes": null, "martes_clave_salon": null, "miercoles": "15:00-17:00", "miercoles_clave_salon": "LIS", "jueves": null, "jueves_clave_salon": null, "viernes": "15:00-17:00", "viernes_clave_salon": "LIS", "sabado": null, "sabado_clave_salon": null},
+        {"id_grupo": 56796, "letra_grupo": "A", "nombre_materia": "TÓPICOS AVANZADOS DE DESARROLLO WEB", "clave_materia": "IDD-2504", "clave_turno": "C.Celaya", "nombre_plan": "Ingeniería en Sistemas Computacionales", "letra_nivel": "L", "lunes": "11:00-12:00", "lunes_clave_salon": "LPA", "martes": null, "martes_clave_salon": null, "miercoles": "11:00-13:00", "miercoles_clave_salon": "LPA", "jueves": null, "jueves_clave_salon": null, "viernes": "11:00-13:00", "viernes_clave_salon": "LPA", "sabado": null, "sabado_clave_salon": null},
+        {"id_grupo": 56801, "letra_grupo": "A", "nombre_materia": "DESARROLLOS MÓVILES Y TECNOLOGÍAS EN LA NUBE", "clave_materia": "IDD-2503", "clave_turno": "C.Celaya", "nombre_plan": "Ingeniería en Sistemas Computacionales", "letra_nivel": "L", "lunes": "09:00-10:00", "lunes_clave_salon": "LMM", "martes": null, "martes_clave_salon": null, "miercoles": "09:00-11:00", "miercoles_clave_salon": "LMM", "jueves": null, "jueves_clave_salon": null, "viernes": "09:00-11:00", "viernes_clave_salon": "LMM", "sabado": null, "sabado_clave_salon": null},
+        {"id_grupo": 56809, "letra_grupo": "B", "nombre_materia": "Administración de Redes", "clave_materia": "SCA-1002", "clave_turno": "C.Celaya", "nombre_plan": "Ingeniería en Sistemas Computacionales", "letra_nivel": "L", "lunes": null, "lunes_clave_salon": null, "martes": "13:00-15:00", "martes_clave_salon": "LRC", "miercoles": null, "miercoles_clave_salon": null, "jueves": "13:00-15:00", "jueves_clave_salon": "LRC", "viernes": null, "viernes_clave_salon": null, "sabado": null, "sabado_clave_salon": null},
+        {"id_grupo": 58408, "letra_grupo": "A", "nombre_materia": "Taller de Investigación I", "clave_materia": "ACA-0909", "clave_turno": "C.Celaya", "nombre_plan": "Ingeniería en Sistemas Computacionales", "letra_nivel": "L", "lunes": null, "lunes_clave_salon": null, "martes": "09:00-11:00", "martes_clave_salon": "C10", "miercoles": null, "miercoles_clave_salon": null, "jueves": "09:00-11:00", "jueves_clave_salon": "C10", "viernes": null, "viernes_clave_salon": null, "sabado": null, "sabado_clave_salon": null}
+      ]
+    }
+  ]
+}

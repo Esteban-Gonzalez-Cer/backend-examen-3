@@ -1,0 +1,24 @@
+{
+  "code": 200,
+  "message": "Bienvenido al aplicación del tecnm",
+  "flag": true,
+  "data": {
+    "numero_control": "23031035",
+    "persona": "ESTEBAN GONZALEZ CERVANTES",
+    "email": "l23031035@celaya.tecnm.mx",
+    "semestre": 7,
+    "num_mat_rep_no_acreditadas": "0",
+    "creditos_acumulados": "203",
+    "promedio_ponderado": "92.2093023255814",
+    "promedio_aritmetico": "92.2093023255814",
+    "materias_cursadas": "44",
+    "materias_reprobadas": "0",
+    "materias_aprobadas": "44",
+    "creditos_complementarios": 0,
+    "porcentaje_avance": 78,
+    "num_materias_rep_primera": null,
+    "num_materias_rep_segunda": null,
+    "percentaje_avance_cursando": 45,
+    "foto": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBD\nAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgG\n"
+  }
+}

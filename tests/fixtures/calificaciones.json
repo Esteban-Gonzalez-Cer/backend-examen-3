@@ -1,0 +1,24 @@
+{
+  "code": 200,
+  "message": "Calificaciones del alumno en este periodo",
+  "flag": true,
+  "data": [
+    {
+      "periodo": {"clave_periodo": "26/2", "anio": 2026, "descripcion_periodo": "Agosto - Diciembre 2026"},
+      "materias": [
+        {"materia": {"id_grupo": 55820, "nombre_materia": "CIBERSEGURIDAD", "clave_materia": "IDD-2502", "letra_grupo": "A"},
+         "calificaiones": [{"id_calificacion": 2861643, "numero_calificacion": 1, "calificacion": "91"}, {"id_calificacion": 2861644, "numero_calificacion": 2, "calificacion": "94"}, {"id_calificacion": 2861645, "numero_calificacion": 3, "calificacion": null}, {"id_calificacion": 2861646, "numero_calificacion": 4, "calificacion": null}]},
+        {"materia": {"id_grupo": 56693, "nombre_materia": "Gestión de Proyectos de Software", "clave_materia": "SCG-1009", "letra_grupo": "B"},
+         "calificaiones": [{"id_calificacion": 2813474, "numero_calificacion": 1, "calificacion": "95"}, {"id_calificacion": 2813475, "numero_calificacion": 2, "calificacion": "98"}, {"id_calificacion": 2813476, "numero_calificacion": 3, "calificacion": null}, {"id_calificacion": 2813477, "numero_calificacion": 4, "calificacion": null}]},
+        {"materia": {"id_grupo": 56796, "nombre_materia": "TÓPICOS AVANZADOS DE DESARROLLO WEB", "clave_materia": "IDD-2504", "letra_grupo": "A"},
+         "calificaiones": [{"id_calificacion": 2764891, "numero_calificacion": 1, "calificacion": "100"}, {"id_calificacion": 2764892, "numero_calificacion": 2, "calificacion": null}, {"id_calificacion": 2764893, "numero_calificacion": 3, "calificacion": null}, {"id_calificacion": 2764894, "numero_calificacion": 4, "calificacion": null}]},
+        {"materia": {"id_grupo": 56801, "nombre_materia": "DESARROLLOS MÓVILES Y TECNOLOGÍAS EN LA NUBE", "clave_materia": "IDD-2503", "letra_grupo": "A"},
+         "calificaiones": [{"id_calificacion": 2741824, "numero_calificacion": 1, "calificacion": "75"}, {"id_calificacion": 2741825, "numero_calificacion": 2, "calificacion": "75"}, {"id_calificacion": 2741826, "numero_calificacion": 3, "calificacion": null}, {"id_calificacion": 2741827, "numero_calificacion": 4, "calificacion": null}]},
+        {"materia": {"id_grupo": 56809, "nombre_materia": "Administración de Redes", "clave_materia": "SCA-1002", "letra_grupo": "B"},
+         "calificaiones": [{"id_calificacion": 2786392, "numero_calificacion": 1, "calificacion": "85"}, {"id_calificacion": 2786393, "numero_calificacion": 2, "calificacion": "85"}, {"id_calificacion": 2786394, "numero_calificacion": 3, "calificacion": null}, {"id_calificacion": 2786395, "numero_calificacion": 4, "calificacion": null}]},
+        {"materia": {"id_grupo": 58408, "nombre_materia": "Taller de Investigación I", "clave_materia": "ACA-0909", "letra_grupo": "A"},
+         "calificaiones": [{"id_calificacion": 2809731, "numero_calificacion": 1, "calificacion": "91"}, {"id_calificacion": 2809732, "numero_calificacion": 2, "calificacion": null}, {"id_calificacion": 2809733, "numero_calificacion": 3, "calificacion": null}, {"id_calificacion": 2809734, "numero_calificacion": 4, "calificacion": null}]}
+      ]
+    }
+  ]
+}
