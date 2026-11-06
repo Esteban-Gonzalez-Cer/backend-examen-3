@@ -1,4 +1,4 @@
-# Trayecta · Backend (FastAPI)
+# Backend (FastAPI)
 
 API propia que funciona como **intermediario** entre el frontend y el SII del ITC
 (`https://sii.celaya.tecnm.mx/api`). El frontend nunca llama al SII: todo pasa por aquí.
